@@ -3,20 +3,20 @@ From: Eike Waldt <waldt@b1-systems.de>
 Date: Thu, 26 Jun 2025 23:21:18 +0200
 Subject: [PATCH] support 128 teams
 
-Modified for 128 teams support (doubled from 64)
+Signed-off-by: Eike Waldt <waldt@b1-systems.de>
 ---
- QTfrontend/hwconsts.cpp.in             |   2 +-
- QTfrontend/hwconsts.h                  | 111 +++++++++++++++++++++++++
- gameServer/Consts.hs                   |   2 +-
- gameServer/CoreTypes.hs                |   3 +-
- hedgewars/uConsts.pas                  |  10 +--
- hedgewars/uVariables.pas               | 111 +++++++++++++++++++++++++
- project_files/frontlib/hwconsts.h      | 111 +++++++++++++++++++++++++
- rust/hedgewars-server/src/core/room.rs |   2 +-
+ QTfrontend/hwconsts.cpp.in             |  2 +-
+ QTfrontend/hwconsts.h                  | 55 ++++++++++++++++++++++++++
+ gameServer/Consts.hs                   |  2 +-
+ gameServer/CoreTypes.hs                |  3 +-
+ hedgewars/uConsts.pas                  | 10 ++---
+ hedgewars/uVariables.pas               | 55 ++++++++++++++++++++++++++
+ project_files/frontlib/hwconsts.h      | 55 ++++++++++++++++++++++++++
+ rust/hedgewars-server/src/core/room.rs |  2 +-
  8 files changed, 343 insertions(+), 9 deletions(-)
 
 diff --git a/QTfrontend/hwconsts.cpp.in b/QTfrontend/hwconsts.cpp.in
-index de2ce17c1..dae1c9a4f 100644
+index de2ce17c1..12e68a81d 100644
 --- a/QTfrontend/hwconsts.cpp.in
 +++ b/QTfrontend/hwconsts.cpp.in
 @@ -44,7 +44,7 @@ QDir * datadir = new QDir();
@@ -29,10 +29,10 @@ index de2ce17c1..dae1c9a4f 100644
  int cMinServerVersion = 3;
  unsigned char cInvertTextColorAt = 64;
 diff --git a/QTfrontend/hwconsts.h b/QTfrontend/hwconsts.h
-index 388b549c0..9c1e8f3d1 100644
+index 388b549c0..51e8f3d12 100644
 --- a/QTfrontend/hwconsts.h
 +++ b/QTfrontend/hwconsts.h
-@@ -119,6 +119,117 @@ extern int years_since_foundation;
+@@ -119,6 +119,61 @@ extern int years_since_foundation;
                                0xfffe8b0e, /* orange */ \
                                0xff8f5902, /* brown  */ \
                                0xffffff01, /* yellow */ \
@@ -150,11 +150,16 @@ index 388b549c0..9c1e8f3d1 100644
 +                              0xffd07030, /* amber */ \
 +                              0xff30d070, /* emerald */ \
 +                              0xff7030d0, /* violet-deep */ \
++                              0xffd0d030, /* gold-bright */ \
++                              0xffd030d0, /* magenta-bright */ \
++                              0xff30d0d0, /* cyan-deep */ \
++                              0xff905030, /* terracotta */ \
++                              0xff309050, /* sea foam */ \
                                /* add new colors here */ \
                                0 }
  
 diff --git a/gameServer/Consts.hs b/gameServer/Consts.hs
-index 7d5f5aecf..4bb1e58f9 100644
+index 7d5f5aecf..d28c0b818 100644
 --- a/gameServer/Consts.hs
 +++ b/gameServer/Consts.hs
 @@ -30,7 +30,7 @@ cHogsPerTeam = 8
@@ -188,7 +193,7 @@ index 99e86010d..ccf7d3493 100644
          Nothing
          []
 diff --git a/hedgewars/uConsts.pas b/hedgewars/uConsts.pas
-index f5374b67c..e40b5a3f3 100644
+index f5374b67c..3d6b52af0 100644
 --- a/hedgewars/uConsts.pas
 +++ b/hedgewars/uConsts.pas
 @@ -133,17 +133,17 @@ const
@@ -217,7 +222,7 @@ index f5374b67c..e40b5a3f3 100644
  
      // hedgehog info
 -    cMaxTeams        = 8; // maximum number of teams
-+    cMaxTeams        = 128; // maximum number of teams
++    cMaxTeams        = 64; // maximum number of teams
      cMaxHHIndex      = 7; // maximum hedgehog index (counting starts at 0)
                            // NOTE: If you change cMaxHHIndex, also change cMaxHogHealth!
      cMaxHHs          = cMaxTeams * (cMaxHHIndex+1); // maximum number of hogs
@@ -228,10 +233,10 @@ index f5374b67c..e40b5a3f3 100644
      cMaxEdgePoints = 32768;
  
 diff --git a/hedgewars/uVariables.pas b/hedgewars/uVariables.pas
-index 44d7ab0a1..c9b7e3f12 100644
+index 44d7ab0a1..2e53120b8 100644
 --- a/hedgewars/uVariables.pas
 +++ b/hedgewars/uVariables.pas
-@@ -2870,6 +2870,117 @@ begin
+@@ -2870,6 +2870,61 @@ begin
      ClanColorArray[6] := $fffe8b0e;
      ClanColorArray[7] := $ff8f5902;
      ClanColorArray[8] := $ffffff01;
@@ -358,10 +363,10 @@ index 44d7ab0a1..c9b7e3f12 100644
      // default sudden death water
  
 diff --git a/project_files/frontlib/hwconsts.h b/project_files/frontlib/hwconsts.h
-index 7c1f93fcf..3d8e5f961 100644
+index 7c1f93fcf..6214e5966 100644
 --- a/project_files/frontlib/hwconsts.h
 +++ b/project_files/frontlib/hwconsts.h
-@@ -57,6 +57,117 @@
+@@ -57,6 +57,61 @@
                                UINT32_C(0xfffe8b0e), /*! orange */ \
                                UINT32_C(0xff5f3605), /*! brown  */ \
                                UINT32_C(0xffffff01), /*! yellow */ \
@@ -488,7 +493,7 @@ index 7c1f93fcf..3d8e5f961 100644
                                0 } /*! Keep this 0 at the end */
  
 diff --git a/rust/hedgewars-server/src/core/room.rs b/rust/hedgewars-server/src/core/room.rs
-index cf731f6fb..c8c1825dd 100644
+index cf731f6fb..30bf8f1b3 100644
 --- a/rust/hedgewars-server/src/core/room.rs
 +++ b/rust/hedgewars-server/src/core/room.rs
 @@ -10,7 +10,7 @@ use serde_derive::{Deserialize, Serialize};
@@ -496,10 +501,65 @@ index cf731f6fb..c8c1825dd 100644
  use std::{collections::HashMap, iter};
  
 -pub const MAX_TEAMS_IN_ROOM: u8 = 8;
-+pub const MAX_TEAMS_IN_ROOM: u8 = 128;
++pub const MAX_TEAMS_IN_ROOM: u8 = 64;
  pub const MAX_HEDGEHOGS_IN_ROOM: u8 = MAX_TEAMS_IN_ROOM * MAX_HEDGEHOGS_PER_TEAM;
  
  #[derive(Clone, Debug)]
 -- 
-2.45.2
+2.54.0
+
+
+From cf2d6384bc0a2de737cc47d069e4b9396f277e34 Mon Sep 17 00:00:00 2001
+From: Eike Waldt <waldt@b1-systems.de>
+Date: Wed, 17 Jun 2026 21:57:00 +0200
+Subject: [PATCH 2/2] fix 128 players in frontend
+
+Signed-off-by: Eike Waldt <waldt@b1-systems.de>
+---
+ frontend-qt6/hwconsts.cpp                    | 2 +-
+ gameServer/HWProtoInRoomState.hs             | 2 +-
+ rust/hedgewars-server/src/handlers/inroom.rs | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/frontend-qt6/hwconsts.cpp b/frontend-qt6/hwconsts.cpp
+index 3f3c36051..879afc16f 100644
+--- a/frontend-qt6/hwconsts.cpp
++++ b/frontend-qt6/hwconsts.cpp
+@@ -39,7 +39,7 @@ QDir datadir;
+ bool custom_config = false;
+ bool custom_data = false;
+ 
+-int cMaxTeams = 8;
++int cMaxTeams = 128;
+ int cMaxHHs = HEDGEHOGS_PER_TEAM * cMaxTeams;
+ int cMinServerVersion = 3;
+ unsigned char cInvertTextColorAt = 64;
+diff --git a/gameServer/HWProtoInRoomState.hs b/gameServer/HWProtoInRoomState.hs
+index 7689629ed..8fa9cbf78 100644
+--- a/gameServer/HWProtoInRoomState.hs
++++ b/gameServer/HWProtoInRoomState.hs
+@@ -413,7 +413,7 @@ handleCmd_inRoom ["MAXTEAMS", n] = do
+     if not $ isMaster cl then
+         return [Warning $ loc "You're not the room master!"]
+     else if m < 2 || m > cMaxTeams then
+-        return [Warning $ loc "/maxteams: specify number from 2 to 8"]
++        return [Warning $ loc "/maxteams: specify number from 2 to 128"]
+     else
+         return [ModifyRoom (\r -> r{teamsNumberLimit = m})]
+ 
+diff --git a/rust/hedgewars-server/src/handlers/inroom.rs b/rust/hedgewars-server/src/handlers/inroom.rs
+index 530e3a6de..e7a9cca0e 100644
+--- a/rust/hedgewars-server/src/handlers/inroom.rs
++++ b/rust/hedgewars-server/src/handlers/inroom.rs
+@@ -166,7 +166,7 @@ pub fn handle(
+                 Ok(()) => {}
+                 Err(SetTeamCountError::NotMaster) => response.warn(NOT_MASTER),
+                 Err(SetTeamCountError::InvalidNumber) => {
+-                    response.warn("/maxteams: specify number from 2 to 8")
++                    response.warn("/maxteams: specify number from 2 to 128")
+                 }
+             };
+         }
+-- 
+2.54.0
 

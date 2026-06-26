@@ -5,7 +5,6 @@ pkgs.hedgewars.overrideAttrs (oldAttrs: {
   
   patches = (oldAttrs.patches or []) ++ [
     ./patches/0001-support-128-teams.patch
-    ./patches/0002-fix-128-players-in-frontend.patch
   ];
 
   postPatch = (oldAttrs.postPatch or "") + ''
