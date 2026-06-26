@@ -1,11 +1,8 @@
 { pkgs }:
-let
-  version = "1.0.3-128teams";
-in
 pkgs.hedgewars.overrideAttrs (oldAttrs: {
   pname = "hedgewars128";
-  inherit version;
-
+  # Keep the original version and src - we only apply patches
+  
   patches = (oldAttrs.patches or []) ++ [
     ./patches/0001-support-128-teams.patch
     ./patches/0002-fix-128-players-in-frontend.patch
