@@ -1,0 +1,505 @@
+From d55b8bcc99dca7d8980514cc43f457207bdaa951 Mon Sep 17 00:00:00 2001
+From: Eike Waldt <waldt@b1-systems.de>
+Date: Thu, 26 Jun 2025 23:21:18 +0200
+Subject: [PATCH] support 128 teams
+
+Modified for 128 teams support (doubled from 64)
+---
+ QTfrontend/hwconsts.cpp.in             |   2 +-
+ QTfrontend/hwconsts.h                  | 111 +++++++++++++++++++++++++
+ gameServer/Consts.hs                   |   2 +-
+ gameServer/CoreTypes.hs                |   3 +-
+ hedgewars/uConsts.pas                  |  10 +--
+ hedgewars/uVariables.pas               | 111 +++++++++++++++++++++++++
+ project_files/frontlib/hwconsts.h      | 111 +++++++++++++++++++++++++
+ rust/hedgewars-server/src/core/room.rs |   2 +-
+ 8 files changed, 343 insertions(+), 9 deletions(-)
+
+diff --git a/QTfrontend/hwconsts.cpp.in b/QTfrontend/hwconsts.cpp.in
+index de2ce17c1..dae1c9a4f 100644
+--- a/QTfrontend/hwconsts.cpp.in
++++ b/QTfrontend/hwconsts.cpp.in
+@@ -44,7 +44,7 @@ QDir * datadir = new QDir();
+ bool custom_config = false;
+ bool custom_data = false;
+ 
+-int cMaxTeams = 8;
++int cMaxTeams = 128;
+ int cMaxHHs = HEDGEHOGS_PER_TEAM * cMaxTeams;
+ int cMinServerVersion = 3;
+ unsigned char cInvertTextColorAt = 64;
+diff --git a/QTfrontend/hwconsts.h b/QTfrontend/hwconsts.h
+index 388b549c0..9c1e8f3d1 100644
+--- a/QTfrontend/hwconsts.h
++++ b/QTfrontend/hwconsts.h
+@@ -119,6 +119,117 @@ extern int years_since_foundation;
+                               0xfffe8b0e, /* orange */ \
+                               0xff8f5902, /* brown  */ \
+                               0xffffff01, /* yellow */ \
++                              0xff00ff00, /* lime   */ \
++                              0xff00ffff, /* cyan   */ \
++                              0xffff00ff, /* magenta */ \
++                              0xff800080, /* purple dark */ \
++                              0xff008080, /* teal dark */ \
++                              0xff808000, /* olive */ \
++                              0xff000080, /* navy */ \
++                              0xff800000, /* maroon */ \
++                              0xffc0c0c0, /* silver */ \
++                              0xff808080, /* gray */ \
++                              0xff400040, /* deep purple */ \
++                              0xff004000, /* dark green */ \
++                              0xff404000, /* dark olive */ \
++                              0xff000040, /* dark navy */ \
++                              0xff400000, /* dark maroon */ \
++                              0xffff8080, /* light red */ \
++                              0xff8080ff, /* light blue */ \
++                              0xff80ff80, /* light green */ \
++                              0xffffff80, /* light yellow */ \
++                              0xff80ffff, /* light cyan */ \
++                              0xffff80ff, /* light magenta */ \
++                              0xffffc080, /* peach */ \
++                              0xff80ffc0, /* mint */ \
++                              0xffc080ff, /* lavender */ \
++                              0xffc0ff80, /* lime light */ \
++                              0xff8080c0, /* steel blue */ \
++                              0xffc08080, /* rose */ \
++                              0xff80c080, /* sage */ \
++                              0xffc0c080, /* khaki */ \
++                              0xff8040ff, /* violet */ \
++                              0xff40ff80, /* spring green */ \
++                              0xffff4080, /* hot pink */ \
++                              0xff4080ff, /* sky blue */ \
++                              0xff80ff40, /* chartreuse */ \
++                              0xffff8040, /* coral */ \
++                              0xff606060, /* dark gray */ \
++                              0xffa0a0a0, /* light gray */ \
++                              0xff602020, /* dark red */ \
++                              0xff206020, /* dark green */ \
++                              0xff202060, /* dark blue */ \
++                              0xff606020, /* dark yellow */ \
++                              0xff602060, /* dark magenta */ \
++                              0xff206060, /* dark cyan */ \
++                              0xffe0e0e0, /* very light gray */ \
++                              0xff202020, /* very dark gray */ \
++                              0xffe00000, /* bright red */ \
++                              0xff00e000, /* bright green */ \
++                              0xff0000e0, /* bright blue */ \
++                              0xffe0e000, /* bright yellow */ \
++                              0xffe000e0, /* bright magenta */ \
++                              0xff00e0e0, /* bright cyan */ \
++                              0xff804020, /* russet */ \
++                              0xff408020, /* forest */ \
++                              0xff204080, /* ocean */ \
++                              0xff802040, /* wine */ \
++                              0xff20ff80, /* sea green */ \
++                              0xff8020ff, /* indigo */ \
++                              0xffff2080, /* crimson */ \
++                              0xff2080ff, /* azure */ \
++                              0xff80ff20, /* yellow-green */ \
++                              0xffff8020, /* tangerine */ \
++                              0xff406040, /* moss */ \
++                              0xff604060, /* plum */ \
++                              0xff604040, /* umber */ \
++                              0xff406060, /* slate */ \
++                              0xffc04040, /* brick */ \
++                              0xff40c040, /* grass */ \
++                              0xff4040c0, /* cobalt */ \
++                              0xffc0c040, /* gold */ \
++                              0xffc040c0, /* orchid */ \
++                              0xff40c0c0, /* turquoise */ \
++                              0xff804040, /* rust */ \
++                              0xff408040, /* pine */ \
++                              0xff404080, /* denim */ \
++                              0xff808040, /* brass */ \
++                              0xff804080, /* mauve */ \
++                              0xff408080, /* peacock */ \
++                              0xffff4040, /* scarlet */ \
++                              0xff40ff40, /* neon green */ \
++                              0xff4040ff, /* electric blue */ \
++                              0xffffff40, /* lemon */ \
++                              0xffff40ff, /* fuchsia */ \
++                              0xff40ffff, /* aqua */ \
++                              0xff204020, /* hunter green */ \
++                              0xff402040, /* eggplant */ \
++                              0xff404020, /* bronze */ \
++                              0xff204040, /* teal dark deep */ \
++                              0xffe04040, /* salmon */ \
++                              0xff40e040, /* lime bright */ \
++                              0xff4040e0, /* royal blue */ \
++                              0xffe0e040, /* citrine */ \
++                              0xffe040e0, /* hot magenta */ \
++                              0xff40e0e0, /* cyan bright */ \
++                              0xffa04040, /* red-brown */ \
++                              0xff40a040, /* green-gray */ \
++                              0xff4040a0, /* blue-gray */ \
++                              0xffa0a040, /* olive-gray */ \
++                              0xffa040a0, /* purple-gray */ \
++                              0xff40a0a0, /* cyan-gray */ \
++                              0xff60c060, /* mint-dark */ \
++                              0xffc06060, /* rose-dark */ \
++                              0xff6060c0, /* lavender-dark */ \
++                              0xffc0c060, /* sand */ \
++                              0xffc060c0, /* pink-dark */ \
++                              0xff60c0c0, /* aqua-dark */ \
++                              0xff906030, /* copper */ \
++                              0xff309060, /* jade */ \
++                              0xff603090, /* amethyst */ \
++                              0xff609030, /* olive-bright */ \
++                              0xff906090, /* purple-muted */ \
++                              0xff309090, /* teal-muted */ \
++                              0xffd07030, /* amber */ \
++                              0xff30d070, /* emerald */ \
++                              0xff7030d0, /* violet-deep */ \
+                               /* add new colors here */ \
+                               0 }
+ 
+diff --git a/gameServer/Consts.hs b/gameServer/Consts.hs
+index 7d5f5aecf..4bb1e58f9 100644
+--- a/gameServer/Consts.hs
++++ b/gameServer/Consts.hs
+@@ -30,7 +30,7 @@ cHogsPerTeam = 8
+ 
+ -- Maximum teams count
+ cMaxTeams :: Int
+-cMaxTeams = 8
++cMaxTeams = 128
+ 
+ -- Maximum total number of hedgehogs
+ cMaxHHs :: Int
+diff --git a/gameServer/CoreTypes.hs b/gameServer/CoreTypes.hs
+index 99e86010d..ccf7d3493 100644
+--- a/gameServer/CoreTypes.hs
++++ b/gameServer/CoreTypes.hs
+@@ -33,6 +33,7 @@ import Data.TConfig
+ import Control.DeepSeq
+ -----------------------
+ import RoomsAndClients
++import Consts
+ 
+ #if __GLASGOW_HASKELL__ < 706
+ instance NFData B.ByteString
+@@ -260,7 +261,7 @@ newRoom =
+         False
+         False
+         4
+-        8
++        cMaxTeams
+         ""
+         Nothing
+         []
+diff --git a/hedgewars/uConsts.pas b/hedgewars/uConsts.pas
+index f5374b67c..e40b5a3f3 100644
+--- a/hedgewars/uConsts.pas
++++ b/hedgewars/uConsts.pas
+@@ -133,17 +133,17 @@ const
+ 
+     lfCurHogCrate    = $0080;  // CurrentHedgehog, and crates, for convenience of AI.  Since an active hog would instantly collect the crate, this does not impact playj
+     lfNotCurHogCrate = $FF7F;  // inverse of above. frequently used
+-    lfObjMask        = $007F;  // lower 7 bits used for hogs and explosives and mines 
++    lfObjMask        = $007F;  // lower 7 bits used for hogs and explosives and mines
+     lfNotObjMask     = $FF80;  // inverse of above.
+ 
+-// breaking up hogs would makes it easier to differentiate 
++// breaking up hogs would makes it easier to differentiate
+ // colliding with a hog from colliding with other things
+ // if overlapping hogs are less common than objects, the division can be altered.
+ // 3 bits for objects, 4 for hogs, that is, overlap 7 barrels/mines before possible dents, and 15 hogs.
+     lfHHMask         = $000F;  // lower 4 bits used only for hogs
+     lfNotHHObjMask   = $0070;  // next 3 bits used for non-hog things
+     lfNotHHObjShift  = 4;
+-    lfNotHHObjSize   = lfNotHHObjMask shr lfNotHHObjShift;  
++    lfNotHHObjSize   = lfNotHHObjMask shr lfNotHHObjShift;
+ 
+     // lower byte is for objects.
+     // consists of 0-127 counted for object checkins and $80 as a bit flag for current hog.
+@@ -183,12 +183,12 @@ const
+     RGB_LUMINANCE_BLUE   = 0.072169;
+ 
+     // hedgehog info
+-    cMaxTeams        = 8; // maximum number of teams
++    cMaxTeams        = 128; // maximum number of teams
+     cMaxHHIndex      = 7; // maximum hedgehog index (counting starts at 0)
+                           // NOTE: If you change cMaxHHIndex, also change cMaxHogHealth!
+     cMaxHHs          = cMaxTeams * (cMaxHHIndex+1); // maximum number of hogs
+ 
+-    cClanColors      = 9; // number of possible clan colors
++    cClanColors      = 128; // number of possible clan colors
+ 
+     cMaxEdgePoints = 32768;
+ 
+diff --git a/hedgewars/uVariables.pas b/hedgewars/uVariables.pas
+index 44d7ab0a1..c9b7e3f12 100644
+--- a/hedgewars/uVariables.pas
++++ b/hedgewars/uVariables.pas
+@@ -2870,6 +2870,117 @@ begin
+     ClanColorArray[6] := $fffe8b0e;
+     ClanColorArray[7] := $ff8f5902;
+     ClanColorArray[8] := $ffffff01;
++    ClanColorArray[9] := $ff00ff00;
++    ClanColorArray[10] := $ff00ffff;
++    ClanColorArray[11] := $ffff00ff;
++    ClanColorArray[12] := $ff800080;
++    ClanColorArray[13] := $ff008080;
++    ClanColorArray[14] := $ff808000;
++    ClanColorArray[15] := $ff000080;
++    ClanColorArray[16] := $ff800000;
++    ClanColorArray[17] := $ffc0c0c0;
++    ClanColorArray[18] := $ff808080;
++    ClanColorArray[19] := $ff400040;
++    ClanColorArray[20] := $ff004000;
++    ClanColorArray[21] := $ff404000;
++    ClanColorArray[22] := $ff000040;
++    ClanColorArray[23] := $ff400000;
++    ClanColorArray[24] := $ffff8080;
++    ClanColorArray[25] := $ff8080ff;
++    ClanColorArray[26] := $ff80ff80;
++    ClanColorArray[27] := $ffffff80;
++    ClanColorArray[28] := $ff80ffff;
++    ClanColorArray[29] := $ffff80ff;
++    ClanColorArray[30] := $ffffc080;
++    ClanColorArray[31] := $ff80ffc0;
++    ClanColorArray[32] := $ffc080ff;
++    ClanColorArray[33] := $ffc0ff80;
++    ClanColorArray[34] := $ff8080c0;
++    ClanColorArray[35] := $ffc08080;
++    ClanColorArray[36] := $ff80c080;
++    ClanColorArray[37] := $ffc0c080;
++    ClanColorArray[38] := $ff8040ff;
++    ClanColorArray[39] := $ff40ff80;
++    ClanColorArray[40] := $ffff4080;
++    ClanColorArray[41] := $ff4080ff;
++    ClanColorArray[42] := $ff80ff40;
++    ClanColorArray[43] := $ffff8040;
++    ClanColorArray[44] := $ff606060;
++    ClanColorArray[45] := $ffa0a0a0;
++    ClanColorArray[46] := $ff602020;
++    ClanColorArray[47] := $ff206020;
++    ClanColorArray[48] := $ff202060;
++    ClanColorArray[49] := $ff606020;
++    ClanColorArray[50] := $ff602060;
++    ClanColorArray[51] := $ff206060;
++    ClanColorArray[52] := $ffe0e0e0;
++    ClanColorArray[53] := $ff202020;
++    ClanColorArray[54] := $ffe00000;
++    ClanColorArray[55] := $ff00e000;
++    ClanColorArray[56] := $ff0000e0;
++    ClanColorArray[57] := $ffe0e000;
++    ClanColorArray[58] := $ffe000e0;
++    ClanColorArray[59] := $ff00e0e0;
++    ClanColorArray[60] := $ff804020;
++    ClanColorArray[61] := $ff408020;
++    ClanColorArray[62] := $ff204080;
++    ClanColorArray[63] := $ff802040;
++    ClanColorArray[64] := $ff20ff80;
++    ClanColorArray[65] := $ff8020ff;
++    ClanColorArray[66] := $ffff2080;
++    ClanColorArray[67] := $ff2080ff;
++    ClanColorArray[68] := $ff80ff20;
++    ClanColorArray[69] := $ffff8020;
++    ClanColorArray[70] := $ff406040;
++    ClanColorArray[71] := $ff604060;
++    ClanColorArray[72] := $ff604040;
++    ClanColorArray[73] := $ff406060;
++    ClanColorArray[74] := $ffc04040;
++    ClanColorArray[75] := $ff40c040;
++    ClanColorArray[76] := $ff4040c0;
++    ClanColorArray[77] := $ffc0c040;
++    ClanColorArray[78] := $ffc040c0;
++    ClanColorArray[79] := $ff40c0c0;
++    ClanColorArray[80] := $ff804040;
++    ClanColorArray[81] := $ff408040;
++    ClanColorArray[82] := $ff404080;
++    ClanColorArray[83] := $ff808040;
++    ClanColorArray[84] := $ff804080;
++    ClanColorArray[85] := $ff408080;
++    ClanColorArray[86] := $ffff4040;
++    ClanColorArray[87] := $ff40ff40;
++    ClanColorArray[88] := $ff4040ff;
++    ClanColorArray[89] := $ffffff40;
++    ClanColorArray[90] := $ffff40ff;
++    ClanColorArray[91] := $ff40ffff;
++    ClanColorArray[92] := $ff204020;
++    ClanColorArray[93] := $ff402040;
++    ClanColorArray[94] := $ff404020;
++    ClanColorArray[95] := $ff204040;
++    ClanColorArray[96] := $ffe04040;
++    ClanColorArray[97] := $ff40e040;
++    ClanColorArray[98] := $ff4040e0;
++    ClanColorArray[99] := $ffe0e040;
++    ClanColorArray[100] := $ffe040e0;
++    ClanColorArray[101] := $ff40e0e0;
++    ClanColorArray[102] := $ffa04040;
++    ClanColorArray[103] := $ff40a040;
++    ClanColorArray[104] := $ff4040a0;
++    ClanColorArray[105] := $ffa0a040;
++    ClanColorArray[106] := $ffa040a0;
++    ClanColorArray[107] := $ff40a0a0;
++    ClanColorArray[108] := $ff60c060;
++    ClanColorArray[109] := $ffc06060;
++    ClanColorArray[110] := $ff6060c0;
++    ClanColorArray[111] := $ffc0c060;
++    ClanColorArray[112] := $ffc060c0;
++    ClanColorArray[113] := $ff60c0c0;
++    ClanColorArray[114] := $ff906030;
++    ClanColorArray[115] := $ff309060;
++    ClanColorArray[116] := $ff603090;
++    ClanColorArray[117] := $ff609030;
++    ClanColorArray[118] := $ff906090;
++    ClanColorArray[119] := $ff309090;
++    ClanColorArray[120] := $ffd07030;
++    ClanColorArray[121] := $ff30d070;
++    ClanColorArray[122] := $ff7030d0;
++    ClanColorArray[123] := $ffd0d030;
++    ClanColorArray[124] := $ffd030d0;
++    ClanColorArray[125] := $ff30d0d0;
++    ClanColorArray[126] := $ff905030;
++    ClanColorArray[127] := $ff309050;
+ 
+     // default sudden death water
+ 
+diff --git a/project_files/frontlib/hwconsts.h b/project_files/frontlib/hwconsts.h
+index 7c1f93fcf..3d8e5f961 100644
+--- a/project_files/frontlib/hwconsts.h
++++ b/project_files/frontlib/hwconsts.h
+@@ -57,6 +57,117 @@
+                               UINT32_C(0xfffe8b0e), /*! orange */ \
+                               UINT32_C(0xff5f3605), /*! brown  */ \
+                               UINT32_C(0xffffff01), /*! yellow */ \
++                              UINT32_C(0xff00ff00), /*! lime   */ \
++                              UINT32_C(0xff00ffff), /*! cyan   */ \
++                              UINT32_C(0xffff00ff), /*! magenta */ \
++                              UINT32_C(0xff800080), /*! purple dark */ \
++                              UINT32_C(0xff008080), /*! teal dark */ \
++                              UINT32_C(0xff808000), /*! olive */ \
++                              UINT32_C(0xff000080), /*! navy */ \
++                              UINT32_C(0xff800000), /*! maroon */ \
++                              UINT32_C(0xffc0c0c0), /*! silver */ \
++                              UINT32_C(0xff808080), /*! gray */ \
++                              UINT32_C(0xff400040), /*! deep purple */ \
++                              UINT32_C(0xff004000), /*! dark green */ \
++                              UINT32_C(0xff404000), /*! dark olive */ \
++                              UINT32_C(0xff000040), /*! dark navy */ \
++                              UINT32_C(0xff400000), /*! dark maroon */ \
++                              UINT32_C(0xffff8080), /*! light red */ \
++                              UINT32_C(0xff8080ff), /*! light blue */ \
++                              UINT32_C(0xff80ff80), /*! light green */ \
++                              UINT32_C(0xffffff80), /*! light yellow */ \
++                              UINT32_C(0xff80ffff), /*! light cyan */ \
++                              UINT32_C(0xffff80ff), /*! light magenta */ \
++                              UINT32_C(0xffffc080), /*! peach */ \
++                              UINT32_C(0xff80ffc0), /*! mint */ \
++                              UINT32_C(0xffc080ff), /*! lavender */ \
++                              UINT32_C(0xffc0ff80), /*! lime light */ \
++                              UINT32_C(0xff8080c0), /*! steel blue */ \
++                              UINT32_C(0xffc08080), /*! rose */ \
++                              UINT32_C(0xff80c080), /*! sage */ \
++                              UINT32_C(0xffc0c080), /*! khaki */ \
++                              UINT32_C(0xff8040ff), /*! violet */ \
++                              UINT32_C(0xff40ff80), /*! spring green */ \
++                              UINT32_C(0xffff4080), /*! hot pink */ \
++                              UINT32_C(0xff4080ff), /*! sky blue */ \
++                              UINT32_C(0xff80ff40), /*! chartreuse */ \
++                              UINT32_C(0xffff8040), /*! coral */ \
++                              UINT32_C(0xff606060), /*! dark gray */ \
++                              UINT32_C(0xffa0a0a0), /*! light gray */ \
++                              UINT32_C(0xff602020), /*! dark red */ \
++                              UINT32_C(0xff206020), /*! dark green */ \
++                              UINT32_C(0xff202060), /*! dark blue */ \
++                              UINT32_C(0xff606020), /*! dark yellow */ \
++                              UINT32_C(0xff602060), /*! dark magenta */ \
++                              UINT32_C(0xff206060), /*! dark cyan */ \
++                              UINT32_C(0xffe0e0e0), /*! very light gray */ \
++                              UINT32_C(0xff202020), /*! very dark gray */ \
++                              UINT32_C(0xffe00000), /*! bright red */ \
++                              UINT32_C(0xff00e000), /*! bright green */ \
++                              UINT32_C(0xff0000e0), /*! bright blue */ \
++                              UINT32_C(0xffe0e000), /*! bright yellow */ \
++                              UINT32_C(0xffe000e0), /*! bright magenta */ \
++                              UINT32_C(0xff00e0e0), /*! bright cyan */ \
++                              UINT32_C(0xff804020), /*! russet */ \
++                              UINT32_C(0xff408020), /*! forest */ \
++                              UINT32_C(0xff204080), /*! ocean */ \
++                              UINT32_C(0xff802040), /*! wine */ \
++                              UINT32_C(0xff20ff80), /*! sea green */ \
++                              UINT32_C(0xff8020ff), /*! indigo */ \
++                              UINT32_C(0xffff2080), /*! crimson */ \
++                              UINT32_C(0xff2080ff), /*! azure */ \
++                              UINT32_C(0xff80ff20), /*! yellow-green */ \
++                              UINT32_C(0xffff8020), /*! tangerine */ \
++                              UINT32_C(0xff406040), /*! moss */ \
++                              UINT32_C(0xff604060), /*! plum */ \
++                              UINT32_C(0xff604040), /*! umber */ \
++                              UINT32_C(0xff406060), /*! slate */ \
++                              UINT32_C(0xffc04040), /*! brick */ \
++                              UINT32_C(0xff40c040), /*! grass */ \
++                              UINT32_C(0xff4040c0), /*! cobalt */ \
++                              UINT32_C(0xffc0c040), /*! gold */ \
++                              UINT32_C(0xffc040c0), /*! orchid */ \
++                              UINT32_C(0xff40c0c0), /*! turquoise */ \
++                              UINT32_C(0xff804040), /*! rust */ \
++                              UINT32_C(0xff408040), /*! pine */ \
++                              UINT32_C(0xff404080), /*! denim */ \
++                              UINT32_C(0xff808040), /*! brass */ \
++                              UINT32_C(0xff804080), /*! mauve */ \
++                              UINT32_C(0xff408080), /*! peacock */ \
++                              UINT32_C(0xffff4040), /*! scarlet */ \
++                              UINT32_C(0xff40ff40), /*! neon green */ \
++                              UINT32_C(0xff4040ff), /*! electric blue */ \
++                              UINT32_C(0xffffff40), /*! lemon */ \
++                              UINT32_C(0xffff40ff), /*! fuchsia */ \
++                              UINT32_C(0xff40ffff), /*! aqua */ \
++                              UINT32_C(0xff204020), /*! hunter green */ \
++                              UINT32_C(0xff402040), /*! eggplant */ \
++                              UINT32_C(0xff404020), /*! bronze */ \
++                              UINT32_C(0xff204040), /*! teal dark deep */ \
++                              UINT32_C(0xffe04040), /*! salmon */ \
++                              UINT32_C(0xff40e040), /*! lime bright */ \
++                              UINT32_C(0xff4040e0), /*! royal blue */ \
++                              UINT32_C(0xffe0e040), /*! citrine */ \
++                              UINT32_C(0xffe040e0), /*! hot magenta */ \
++                              UINT32_C(0xff40e0e0), /*! cyan bright */ \
++                              UINT32_C(0xffa04040), /*! red-brown */ \
++                              UINT32_C(0xff40a040), /*! green-gray */ \
++                              UINT32_C(0xff4040a0), /*! blue-gray */ \
++                              UINT32_C(0xffa0a040), /*! olive-gray */ \
++                              UINT32_C(0xffa040a0), /*! purple-gray */ \
++                              UINT32_C(0xff40a0a0), /*! cyan-gray */ \
++                              UINT32_C(0xff60c060), /*! mint-dark */ \
++                              UINT32_C(0xffc06060), /*! rose-dark */ \
++                              UINT32_C(0xff6060c0), /*! lavender-dark */ \
++                              UINT32_C(0xffc0c060), /*! sand */ \
++                              UINT32_C(0xffc060c0), /*! pink-dark */ \
++                              UINT32_C(0xff60c0c0), /*! aqua-dark */ \
++                              UINT32_C(0xff906030), /*! copper */ \
++                              UINT32_C(0xff309060), /*! jade */ \
++                              UINT32_C(0xff603090), /*! amethyst */ \
++                              UINT32_C(0xff609030), /*! olive-bright */ \
++                              UINT32_C(0xff906090), /*! purple-muted */ \
++                              UINT32_C(0xff309090), /*! teal-muted */ \
++                              UINT32_C(0xffd07030), /*! amber */ \
++                              UINT32_C(0xff30d070), /*! emerald */ \
++                              UINT32_C(0xff7030d0), /*! violet-deep */ \
++                              UINT32_C(0xffd0d030), /*! gold-bright */ \
++                              UINT32_C(0xffd030d0), /*! magenta-bright */ \
++                              UINT32_C(0xff30d0d0), /*! cyan-deep */ \
++                              UINT32_C(0xff905030), /*! terracotta */ \
++                              UINT32_C(0xff309050), /*! sea foam */ \
+                               /*! add new colors here */ \
+                               0 } /*! Keep this 0 at the end */
+ 
+diff --git a/rust/hedgewars-server/src/core/room.rs b/rust/hedgewars-server/src/core/room.rs
+index cf731f6fb..c8c1825dd 100644
+--- a/rust/hedgewars-server/src/core/room.rs
++++ b/rust/hedgewars-server/src/core/room.rs
+@@ -10,7 +10,7 @@ use serde_derive::{Deserialize, Serialize};
+ use serde_yaml;
+ use std::{collections::HashMap, iter};
+ 
+-pub const MAX_TEAMS_IN_ROOM: u8 = 8;
++pub const MAX_TEAMS_IN_ROOM: u8 = 128;
+ pub const MAX_HEDGEHOGS_IN_ROOM: u8 = MAX_TEAMS_IN_ROOM * MAX_HEDGEHOGS_PER_TEAM;
+ 
+ #[derive(Clone, Debug)]
+-- 
+2.45.2
+

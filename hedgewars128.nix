@@ -1,0 +1,27 @@
+{ pkgs }:
+let
+  version = "1.0.3-128teams";
+in
+pkgs.hedgewars.overrideAttrs (oldAttrs: {
+  pname = "hedgewars128";
+  inherit version;
+
+  patches = (oldAttrs.patches or []) ++ [
+    ./patches/0001-support-128-teams.patch
+    ./patches/0002-fix-128-players-in-frontend.patch
+  ];
+
+  postPatch = (oldAttrs.postPatch or "") + ''
+    # Replace logo with custom 128-team version
+    cp ${./assets/HedgewarsTitle.png} QTfrontend/res/HedgewarsTitle.png
+  '';
+
+  meta = oldAttrs.meta // {
+    description = "Hedgewars with 128 teams/players support";
+    longDescription = oldAttrs.meta.longDescription + ''
+
+      This is a patched version of Hedgewars that supports up to 128 teams
+      instead of the default 8 teams, allowing for massive multiplayer battles.
+    '';
+  };
+})
